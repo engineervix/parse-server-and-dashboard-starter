@@ -1,0 +1,21 @@
+node_modules/
+.git
+.gitignore
+/npm-debug.log
+/.idea/
+.vscode
+coverage*
+.coverage
+.DS_Store
+*.swp
+.env
+
+# SSL
+*.pem
+*.crt
+*.key
+
+# Ignore everything in this directory
+config/nginx/*
+## Except the following files:
+!config/nginx/nginx.conf.example

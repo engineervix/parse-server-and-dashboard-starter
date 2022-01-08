@@ -1,0 +1,28 @@
+version: '3'
+services:
+
+  node-app:
+    build: .
+    image: node-app
+    command: npm run dev
+    ports:
+      - '1337:1337'
+      - '4040:4040'
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/usr/src/node-app
+      # http://jdlm.info/articles/2016/03/06/lessons-building-node-app-docker.html
+      - /usr/src/node-app/node_modules
+
+  mongodb:
+    image: mongo:5.0.5
+    ports:
+      - 27017:27017
+    volumes:
+      - dbdata:/data/db
+
+volumes:
+  dbdata:

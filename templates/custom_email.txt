@@ -1,0 +1,6 @@
+Greetings!
+
+This is a notice regarding your account:
+{{username}}
+
+{{appName}}

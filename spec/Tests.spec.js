@@ -24,7 +24,7 @@ describe('Parse Server example', () => {
       url: 'http://localhost:30001/',
     });
     expect(headers['content-type']).toContain('text/html');
-    expect(text).toBe('I dream of being a website.  Please star the parse-server repo on GitHub!');
+    expect(text).toBe('Hello there, stranger ...');
   });
   it('coverage for /test', async () => {
     const { text, headers } = await Parse.Cloud.httpRequest({

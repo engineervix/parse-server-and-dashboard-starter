@@ -1,24 +1,16 @@
-# parse-server-example <!-- omit in toc -->
+<!-- omit in toc -->
+# parse-server-and-dashboard-starter
 
-[![Join The Conversation](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/parse-server)
-[![Backers on Open Collective](https://opencollective.com/parse-server/tiers/backers/badge.svg)][open-collective-link]
-[![Sponsors on Open Collective](https://opencollective.com/parse-server/tiers/sponsors/badge.svg)][open-collective-link]
-[![License][license-svg]][license-link]
-[![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
+A production-ready project using the [parse-server](https://github.com/ParsePlatform/parse-server) and [parse-dashboard](https://github.com/parse-community/parse-dashboard) modules on Express. Read the full [Parse Server Guide](https://docs.parseplatform.org/parse-server/guide/) for more information.
 
-Example project using the [parse-server](https://github.com/ParsePlatform/parse-server) module on Express. Read the full [Parse Server Guide](https://docs.parseplatform.org/parse-server/guide/) for more information.
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-# Table of Contents <!-- omit in toc -->
-
+- [About](#about)
 - [Local Development](#local-development)
   - [Helpful Scripts](#helpful-scripts)
-- [Remote Deployment](#remote-deployment)
-  - [Heroku](#heroku)
-  - [AWS Elastic Beanstalk](#aws-elastic-beanstalk)
-  - [Microsoft Azure App Service](#microsoft-azure-app-service)
-  - [Google App Engine](#google-app-engine)
-  - [Scalingo](#scalingo)
-  - [OpenShift Online (Next Gen)](#openshift-online-next-gen)
+- [Deployment](#deployment)
 - [Using Parse Server](#using-parse-server)
   - [Health Check](#health-check)
   - [APIs and SDKs](#apis-and-sdks)
@@ -26,109 +18,62 @@ Example project using the [parse-server](https://github.com/ParsePlatform/parse-
     - [JavaScript](#javascript)
     - [Android](#android)
     - [iOS / tvOS / iPadOS / macOS (Swift)](#ios--tvos--ipados--macos-swift)
+- [TODO](#todo)
 
-# Local Development
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-* Make sure you have at least Node 4.3. `node --version`
-* Clone this repo and change directory to it.
-* `npm install`
-* Install mongo locally using http://docs.mongodb.org/master/tutorial/install-mongodb-on-os-x/
-* Run `mongo` to connect to your database, just to make sure it's working. Once you see a mongo prompt, exit with Control-D
-* Run the server with: `npm start`
-* By default it will use a path of /parse for the API routes.  To change this, or use older client SDKs, run `export PARSE_MOUNT=/1` before launching the server.
-* You now have a database named "dev" that contains your Parse data
-* Install ngrok and you can test with devices
+## About
 
-## Helpful Scripts
+This builds up on [parse-community/parse-server-example](https://github.com/parse-community/parse-server-example), with several modifications and additions, including:
+
+- [parse-dashboard](https://github.com/parse-community/parse-dashboard)
+- email configuration with custom templates
+- Nginx config for deployment on a Linux server
+- Production process-management via [PM2](https://pm2.io/)
+- Production Error tracking via [Sentry](https://sentry.io/)
+- Logging via [winston](https://www.npmjs.com/package/winston)
+- HTTP request logging via [morgan](https://www.npmjs.com/package/morgan)
+- [dotenv](https://www.npmjs.com/package/dotenv) to load environment variables from a `.env` file into [process.env](https://nodejs.org/docs/latest/api/process.html#process_process_env).
+- [cross-env](https://www.npmjs.com/package/cross-env) for running scripts that set and use environment variables across platforms
+- [nodemon](https://www.npmjs.com/package/nodemon) for automatically restarting the node application when file changes in the directory are detected
+<!-- - Additional middleware, including [helmet](https://www.npmjs.com/package/helmet), [npm i express-mongo-sanitize](express-mongo-sanitize), [xss-clean](https://www.npmjs.com/package/xss-clean) -->
+
+## Local Development
+
+- Make sure you have at least Node 4.3. `node --version`
+- Clone this repo and change directory to it.
+- Make a copy of `.env.example` and rename it to `.env`, then update the Environment Variables accordingly
+- `docker-compose up -d --build`
+- By default it will use a path of `/parse` for the API routes.  To change this, or use older client SDKs, run `export PARSE_MOUNT=/1` before launching the server.
+- You now have a database named "dev" that contains your Parse data
+- Install ngrok and you can test with devices
+
+### Helpful Scripts
+
 These scripts can help you to develop your app for Parse Server:
 
-* `npm run watch` will start your Parse Server and restart if you make any changes.
-* `npm run lint` will check the linting of your cloud code, tests and `index.js`, as defined in `.eslintrc.json`.
-* `npm run lint-fix` will attempt fix the linting of your cloud code, tests and `index.js`.
-* `npm run prettier` will help improve the formatting and layout of your cloud code, tests and `index.js`, as defined in `.prettierrc`.
-* `npm run test` will run any tests that are written in `/spec`.
-* `npm run coverage` will run tests and check coverage. Output is available in the `/coverage` folder.
+- `npm run watch` will start your Parse Server and restart if you make any changes.
+- `npm run lint` will check the linting of your cloud code, tests and `index.js`, as defined in `.eslintrc.json`.
+- `npm run lint-fix` will attempt fix the linting of your cloud code, tests and `index.js`.
+- `npm run prettier` will help improve the formatting and layout of your cloud code, tests and `index.js`, as defined in `.prettierrc`.
+- `npm run test` will run any tests that are written in `/spec`.
+- `npm run coverage` will run tests and check coverage. Output is available in the `/coverage` folder.
 
-# Remote Deployment
+## Deployment
 
-## Heroku
+See <https://derkinzi.de/how-to-run-parse-dashboard-alongside-parse-server-on-digital-ocean/> for Nginx configuration.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+Also have a look at <https://www.sitepoint.com/parse-platform-back4app-beginner-guide/>.
 
-Alternatively, to deploy manually:
+You will need to make a copy of `.prod.env.example` and rename it to `.prod.env`, then update the Environment Variables accordingly.
 
-* Clone the repo and change directory to it
-* Log in with the [Heroku Toolbelt](https://toolbelt.heroku.com/) and create an app: `heroku create`
-* Use the [mLab addon](https://elements.heroku.com/addons/mongolab): `heroku addons:create mongolab:sandbox --app YourAppName`
-* By default it will use a path of /parse for the API routes.  To change this, or use older client SDKs, run `heroku config:set PARSE_MOUNT=/1`
-* Deploy it with: `git push heroku master`
+If you need to setup MongoDB and PM2 on your server, you might find the [scripts/ubuntu_setup.sh](scripts/ubuntu_setup.sh) file useful.
 
-## AWS Elastic Beanstalk
+There's a production ready [Nginx configuration](config/nginx/nginx.conf.example) file which you can tweak to your preferences. Generally, the configuration is based on a server bootstrapped using [engineervix/ubuntu-server-setup](https://github.com/engineervix/ubuntu-server-setup) -- you will find some of the referenced files in the **configuration_files** directory in this repo.
 
-<a title="Deploy to AWS" href="https://console.aws.amazon.com/elasticbeanstalk/home?region=us-west-2#/newApplication?applicationName=ParseServer&solutionStackName=Node.js&tierName=WebServer&sourceBundleUrl=https://s3.amazonaws.com/elasticbeanstalk-samples-us-east-1/eb-parse-server-sample/parse-server-example.zip" target="_blank"><img src="http://d0.awsstatic.com/product-marketing/Elastic%20Beanstalk/deploy-to-aws.png" height="40"></a>
+## Using Parse Server
 
-Alternatively, deploy your local changes manually:
-
-* Clone the repo and change directory to it
-* Log in with the [AWS Elastic Beanstalk CLI](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html), select a region, and create an app: `eb init`
-* Create an environment and pass in MongoDB URI, App ID, and Master Key: `eb create --envvars DATABASE_URI=<replace with URI>,APP_ID=<replace with Parse app ID>,MASTER_KEY=<replace with Parse master key>`
-
-## Microsoft Azure App Service
-
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.ParseServer)
-
-Detailed information is available here:
-* [Parse Server with Azure Managed Services](https://azure.microsoft.com/en-us/marketplace/partners/microsoft/parseserver/)
-* [Parse Server Azure Blog Post](https://azure.microsoft.com/en-us/blog/announcing-the-publication-of-parse-server-with-azure-managed-services/)
-
-## Google App Engine
-
-1. Clone the repo and change directory to it 
-1. Create a project in the [Google Cloud Platform Console](https://console.cloud.google.com/).
-1. [Enable billing](https://console.cloud.google.com/project/_/settings) for your project.
-1. Install the [Google Cloud SDK](https://cloud.google.com/sdk/).
-1. Setup a MongoDB server.  You have a few options:
-  1. Create a Google Compute Engine virtual machine with [MongoDB pre-installed](https://cloud.google.com/launcher/?q=mongodb).
-  1. Use [mLab](https://mlab.com/google/) to create a free MongoDB deployment on Google Cloud Platform (only US-central).
-1. Modify `app.yaml` to update your environment variables.
-1. Delete `Dockerfile`
-1. Deploy it with `gcloud preview app deploy`
-
-A detailed tutorial is available here:
-[Running Parse server on Google App Engine](https://cloud.google.com/nodejs/resources/frameworks/parse-server)
-
-## Scalingo
-
-[![Deploy to Scalingo](https://cdn.scalingo.com/deploy/button.svg)](https://my.scalingo.com/deploy)
-
-Alternatively, to deploy manually:
-
-* Clone the repo and change directory to it
-* Log in with the [Scalingo CLI](http://cli.scalingo.com/) and create an app: `scalingo create my-parse`
-* Use the [Scalingo MongoDB addon](https://scalingo.com/addons/scalingo-mongodb): `scalingo addons-add scalingo-mongodb free`
-* Setup MongoDB connection string: `scalingo env-set DATABASE_URI='$SCALINGO_MONGO_URL'`
-* By default it will use a path of /parse for the API routes. To change this, or use older client SDKs, run `scalingo env-set PARSE_MOUNT=/1`
-* Deploy it with: `git push scalingo master`
-
-## OpenShift Online (Next Gen)
-
-1. Register for a free [OpenShift Online (Next Gen) account](http://www.openshift.com/devpreview/register.html)
-1. Create a project in the [OpenShift Online Console](https://console.preview.openshift.com/console/).
-1. Install the [OpenShift CLI](https://docs.openshift.com/online/getting_started/beyond_the_basics.html#btb-installing-the-openshift-cli).
-1. Add the Parse Server template to your project: `oc create -f https://raw.githubusercontent.com/ParsePlatform/parse-server-example/master/openshift.json`
-1. Deploy Parse Server from the web console
-  1. Open your project in the [OpenShift Online Console](https://console.preview.openshift.com/console/):
-  1. Click **Add to Project** from the top navigation
-  1. Scroll down and select **NodeJS > Parse Server**
-  1. (Optionally) Update the Parse Server settings (parameters)
-  1. Click **Create**
-
-A detailed tutorial is available here:
-[Running Parse Server on OpenShift Online (Next Gen)](https://blog.openshift.com/parse-server/)
-
-# Using Parse Server
-
-## Health Check
+### Health Check
 
 You can use the `/health` endpoint to verify that Parse Server is up and running. For example, for local deployment, enter this URL in your browser:
 
@@ -136,15 +81,16 @@ You can use the `/health` endpoint to verify that Parse Server is up and running
 
 If you deployed Parse Server remotely, change the URL accordingly.
 
-## APIs and SDKs
+### APIs and SDKs
 
 Use the REST API, GraphQL API or any of the Parse SDKs to see Parse Server in action. Parse Server comes with a variety of SDKs to cover most common ecosystems and languages, such as JavaScript, Swift, ObjectiveC and Android just to name a few.
 
 The following shows example requests when interacting with a local deployment of Parse Server. If you deployed Parse Server remotely, change the URL accordingly.
 
-### REST API
+#### REST API
 
 Save object:
+
 ```sh
 curl -X POST \
   -H "X-Parse-Application-Id: YOUR_APP_ID" \
@@ -154,6 +100,7 @@ curl -X POST \
 ```
 
 Call Cloud Code function:
+
 ```sh
 curl -X POST \
   -H "X-Parse-Application-Id: YOUR_APP_ID" \
@@ -162,7 +109,7 @@ curl -X POST \
   http://localhost:1337/parse/functions/hello
 ```
 
-### JavaScript
+#### JavaScript
 
 ```js
 // Initialize SDK
@@ -179,7 +126,8 @@ const query = new Parse.Query('GameScore');
 const objAgain = await query.get(obj.id);
 ```
 
-### Android
+#### Android
+
 ```java
 // Initialize SDK in the application class
 Parse.initialize(new Parse.Configuration.Builder(getApplicationContext())
@@ -193,7 +141,8 @@ obj.put("foo", "bar");
 obj.saveInBackground();
 ```
 
-### iOS / tvOS / iPadOS / macOS (Swift)
+#### iOS / tvOS / iPadOS / macOS (Swift)
+
 ```swift
 // Initialize SDK in AppDelegate
 Parse.initializeWithConfiguration(ParseClientConfiguration(block: {
@@ -202,8 +151,9 @@ Parse.initializeWithConfiguration(ParseClientConfiguration(block: {
     configuration.applicationId = "YOUR_APP_ID"
 }))
 ```
+
 You can change the server URL in all of the open-source SDKs, but we're releasing new builds which provide initialization time configuration of this property.
 
-[license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
-[license-link]: LICENSE
-[open-collective-link]: https://opencollective.com/parse-server
+## TODO
+
+- [ ] Fix broken tests

@@ -1,26 +1,18 @@
-FROM node:latest
+FROM node:14.18.2-buster
 
-RUN mkdir parse
+RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
 
-ADD . /parse
-WORKDIR /parse
+WORKDIR /usr/src/node-app
+
+RUN npm install -g parse-dashboard
+
+COPY package.json ./
+COPY package-lock.json ./
+
+USER node
+
 RUN npm install
 
-ENV APP_ID setYourAppId
-ENV MASTER_KEY setYourMasterKey
-ENV DATABASE_URI setMongoDBURI
+COPY --chown=node:node . .
 
-# Optional (default : 'parse/cloud/main.js')
-# ENV CLOUD_CODE_MAIN cloudCodePath
-
-# Optional (default : '/parse')
-# ENV PARSE_MOUNT mountPath
-
-EXPOSE 1337
-
-# Uncomment if you want to access cloud code outside of your container
-# A main.js file must be present, if not Parse will not start
-
-# VOLUME /parse/cloud               
-
-CMD [ "npm", "start" ]
+ENV PATH ./node_modules/.bin:$PATH

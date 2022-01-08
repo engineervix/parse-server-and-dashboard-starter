@@ -1,0 +1,158 @@
+## http://subdomain.example.com redirects to https://subdomain.example.com
+server {
+    listen 80;
+    listen [::]:80;
+    server_name subdomain.example.com;
+
+    # include /etc/nginx/snippets/letsencrypt.conf;
+
+    location / {
+        return 301 https://subdomain.example.com$request_uri;
+    }
+}
+
+## Serves https://subdomain.example.com
+server {
+    server_name subdomain.example.com;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    # gzip off;
+    gzip on;
+    gzip_disable "msie6";
+
+    gzip_comp_level 6;
+    gzip_min_length 1100;
+    gzip_buffers 16 8k;
+    gzip_proxied any;
+    gzip_types
+        # text/plain
+        text/css
+        text/js
+        # text/xml
+        text/javascript
+        application/javascript
+        application/x-javascript;
+        # application/json
+        # application/xml
+        # application/rss+xml
+        # image/svg+xml;
+
+    ssl_certificate /etc/letsencrypt/live/subdomain.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/subdomain.example.com/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/subdomain.example.com/fullchain.pem;
+
+    ssl_client_certificate /etc/letsencrypt/cloudflare/origin-pull-ca.pem;
+    ssl_verify_client on;
+
+    include /etc/nginx/snippets/ssl.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # recommended by Certbot
+    ssl_dhparam /etc/letsencrypt/dhparam.pem;
+
+    ## server_tokens off;                      # already in /etc/nginx/snippets/ssl.conf
+
+    ## add_header X-Frame-Options DENY;        # already in /etc/nginx/snippets/ssl.conf
+    ## add_header X-Content-Type-Options nosniff always;    # already in /etc/nginx/snippets/ssl.conf
+    # add_header X-Xss-Protection "1";
+    ## add_header X-Xss-Protection "1; mode=block" always;    # already in /etc/nginx/snippets/ssl.conf
+
+    # WARNING! This header must be carefully planned before deploying it on production website
+    # as it could easily break stuff and prevent a website to load it’s content!
+    # for more info, read https://letsecure.me/secure-web-deployment-with-lets-encrypt-and-nginx/
+    # https://content-security-policy.com/
+    # https://scotthelme.co.uk/content-security-policy-an-introduction/
+    add_header Content-Security-Policy "script-src 'self' https://*.google-analytics.com https://*.googleapis.com https://*.twimg.com https://*.google.com https://www.google.com/recaptcha/api/js/recaptcha_ajax.js https://freegeoip.net https://*.ravenjs.com https://*.sentry.io https://*.disqus.com https://*.amazonaws.com https://*.time.ly https://*.googletagmanager.com https://api.reftagger.com https://reftaggercdn.global.ssl.fastly.net https://*.addthis.com https://*.gstatic.com https://*.cloudflare.com https://*.maxcdn.com https://browser-update.org https://*.twitter.com https://*.youtube.com https://cdn.jsdelivr.net 'unsafe-inline' 'unsafe-eval'";
+    # add_header Content-Security-Policy "default-src 'self'";
+    # add_header Content-Security-Policy "default-src 'self'; script-src 'self' *.google-analytics.com";
+    add_header Referrer-Policy strict-origin-when-cross-origin;
+
+    ## ssl_stapling on;           # already in /etc/nginx/snippets/ssl.conf
+    ## ssl_stapling_verify on;    # already in /etc/nginx/snippets/ssl.conf
+
+    sendfile              on;
+    client_max_body_size 50M;
+    keepalive_timeout      0;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    # location /ico {
+    #   alias /path/to/your/project/public/img/ico;
+    # }
+
+    location / {
+      proxy_pass http://localhost:1337/;
+
+      # prevents 502 bad gateway error
+      proxy_buffers 8 32k;
+      proxy_buffer_size 64k;
+
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-NginX-Proxy true;
+      proxy_ssl_session_reuse off;
+      # proxy_set_header X-Forwarded-Proto $scheme;
+
+      # enables WS support
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+
+      proxy_redirect off;
+      proxy_read_timeout 240s;
+
+    }
+
+    # Serve the Parse API on the /parse URL prefix
+    location /parse/ {
+      proxy_pass http://localhost:1337/parse/;
+
+      # prevents 502 bad gateway error
+      proxy_buffers 8 32k;
+      proxy_buffer_size 64k;
+
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-NginX-Proxy true;
+      proxy_ssl_session_reuse off;
+      # proxy_set_header X-Forwarded-Proto $scheme;
+
+      # enables WS support
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+
+      proxy_redirect off;
+      proxy_read_timeout 240s;
+    }
+
+    # Serve the ParseDashboard on the /dashboard URL prefix
+    location /dashboard/ {
+      proxy_pass http://localhost:4040/dashboard/;
+
+      # prevents 502 bad gateway error
+      # proxy_buffers 8 32k;
+      # proxy_buffer_size 64k;
+
+      proxy_set_header Host $http_host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-NginX-Proxy true;
+      proxy_ssl_session_reuse off;
+      # proxy_set_header X-Forwarded-Proto $scheme;
+
+      # enables WS support
+      # proxy_http_version 1.1;
+      # proxy_set_header Upgrade $http_upgrade;
+      # proxy_set_header Connection "upgrade";
+
+      proxy_redirect off;
+      # proxy_read_timeout 240s;
+    }
+
+    access_log /path/to/your/project/logs/subdomain.example.com_nginx_access_log;
+    error_log /path/to/your/project/logs/subdomain.example.com_nginx_error_log;
+}
